@@ -98,10 +98,8 @@
             <div class="p-5 border-b" style="border-color: rgba(242,153,35,0.3);">
                 <div class="flex flex-col items-center gap-2">
                     <div class="rounded-xl px-4 py-3" style="background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.3);">
-                        <div style="overflow:hidden; height:48px;">
-                            <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal Logo"
-                                style="height:80px; width:auto; display:block; margin:0 auto;">
-                        </div>
+                        <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal Logo"
+                            class="h-12 w-auto object-contain">
                     </div>
                     <div class="font-semibold text-xs tracking-widest" style="color:#ffdd79; letter-spacing:0.15em;">PAYMENT SYSTEM</div>
                 </div>
