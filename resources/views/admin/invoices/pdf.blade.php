@@ -88,19 +88,9 @@
 <body>
 
     <!-- Header -->
-    @php
-        $logoPath = base_path('public/images/logo/logo.png');
-        $logoSrc = file_exists($logoPath)
-            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
-            : null;
-    @endphp
     <div class="header">
         <div class="header-left">
-            @if($logoSrc)
-            <img src="{{ $logoSrc }}" alt="Vanilla Royal" style="height:52px; width:auto; display:block; margin-bottom:8px;">
-            @else
-            <div style="font-size:22px; font-weight:bold; color:#fff; margin-bottom:8px;">Vanilla Royal</div>
-            @endif
+            <div style="font-size:22px; font-weight:bold; color:#fff; margin-bottom:4px; letter-spacing:0.5px;">Vanilla Royal</div>
             <div class="company-contact">
                 info@vanillaroyal.id &nbsp;|&nbsp; +62 858-5366-9568
             </div>

@@ -85,13 +85,8 @@ class PaymentController extends Controller
             abort(403, 'Invoice belum lunas.');
         }
 
-        try {
-            $pdf = Pdf::loadView('admin.invoices.pdf', compact('invoice'))->setPaper('a4');
-            return $pdf->download('invoice-lunas-' . $invoice->invoice_number . '.pdf');
-        } catch (\Throwable $e) {
-            return response('PDF Error: ' . $e->getMessage() . "\n\n" . $e->getTraceAsString(), 500)
-                ->header('Content-Type', 'text/plain');
-        }
+        $pdf = Pdf::loadView('admin.invoices.pdf', compact('invoice'))->setPaper('a4');
+        return $pdf->download('invoice-lunas-' . $invoice->invoice_number . '.pdf');
     }
 
     public function uploadProof(Request $request, string $token)
