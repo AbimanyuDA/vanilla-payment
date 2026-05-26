@@ -58,7 +58,7 @@
                 <div>
                     <div class="flex items-center gap-2 mb-1">
                         <div style="overflow:hidden; height:32px; width:32px;">
-                            <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal" style="height:53px; width:auto; display:block; margin:0 auto;">
+                            <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal" style="height:41px; width:auto; display:block; margin:0 auto;">
                         </div>
                         <span class="font-bold text-lg">Vanilla Royal</span>
                     </div>
