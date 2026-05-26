@@ -1,0 +1,47 @@
+{
+    "version": 2,
+    "framework": null,
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.7.4",
+            "excludeFiles": "{tests/**,database/migrations/**,database/seeders/**,database/factories/**,storage/logs/**,storage/framework/**,node_modules/**,public/build/**}"
+        }
+    },
+    "routes": [
+        {
+            "src": "/(css|js|images|fonts)/(.*)",
+            "dest": "/public/$1/$2"
+        },
+        {
+            "src": "/build/(.*)",
+            "dest": "/public/build/$1"
+        },
+        {
+            "src": "/(favicon\\.ico|robots\\.txt)",
+            "dest": "/public/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.php"
+        }
+    ],
+    "buildCommand": null,
+    "outputDirectory": "public",
+    "env": {
+        "APP_NAME": "Vanilla Royal Payment",
+        "APP_ENV": "production",
+        "APP_DEBUG": "false",
+        "APP_URL": "https://payment.vanillaroyal.id",
+        "APP_CONFIG_CACHE": "/tmp/config.php",
+        "APP_EVENTS_CACHE": "/tmp/events.php",
+        "APP_PACKAGES_CACHE": "/tmp/packages.php",
+        "APP_ROUTES_CACHE": "/tmp/routes.php",
+        "APP_SERVICES_CACHE": "/tmp/services.php",
+        "VIEW_COMPILED_PATH": "/tmp",
+        "CACHE_DRIVER": "array",
+        "SESSION_DRIVER": "cookie",
+        "LOG_CHANNEL": "stderr",
+        "DB_CONNECTION": "mysql",
+        "COMPOSER_FLAGS": "--no-dev --prefer-dist --optimize-autoloader --classmap-authoritative"
+    }
+}
