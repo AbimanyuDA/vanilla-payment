@@ -57,9 +57,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
                 <div>
                     <div class="flex items-center gap-2 mb-1">
-                        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                            <span class="text-white font-bold">V</span>
-                        </div>
+                        <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal" class="w-8 h-8 object-contain">
                         <span class="font-bold text-lg">Vanilla Royal</span>
                     </div>
                     <p class="text-sm text-base-content/60">Payment System</p>
