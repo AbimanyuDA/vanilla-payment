@@ -18,7 +18,7 @@
     <div style="text-align:center; margin-bottom:1.75rem;">
         <div style="display:inline-block; background:#fff; border-radius:16px; padding:1rem 1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.25);">
             <div style="overflow:hidden; height:80px;">
-                <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal" style="height:103px; width:auto; display:block; margin:0 auto;">
+                <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal" style="height:95px; width:auto; display:block; margin:0 auto;">
             </div>
         </div>
     </div>
