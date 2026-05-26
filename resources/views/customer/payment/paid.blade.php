@@ -16,7 +16,7 @@
 
     <!-- Logo -->
     <div style="text-align:center; margin-bottom:1.75rem;">
-        <div style="display:inline-block; background:#fff; border-radius:16px; padding:1.5rem 2rem; box-shadow:0 4px 20px rgba(0,0,0,0.25);">
+        <div style="display:inline-block; background:#fff; border-radius:16px; padding:1rem 1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.25);">
             <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal" style="height:80px; width:auto; display:block;">
         </div>
     </div>

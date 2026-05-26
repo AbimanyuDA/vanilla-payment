@@ -30,7 +30,7 @@
 
     <!-- Brand Header -->
     <div class="text-center mb-6">
-        <div class="inline-block rounded-2xl px-8 py-6 mb-2"
+        <div class="inline-block rounded-2xl px-5 py-4 mb-2"
             style="background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
             <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal Logo"
                 class="w-auto object-contain mx-auto" style="height:80px;">
