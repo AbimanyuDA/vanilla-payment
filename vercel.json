@@ -4,6 +4,9 @@
     "functions": {
         "api/index.php": {
             "runtime": "vercel-php@0.7.4",
+            "regions": [
+                "sin1"
+            ],
             "excludeFiles": "{tests/**,database/migrations/**,database/seeders/**,database/factories/**,storage/logs/**,storage/framework/**,node_modules/**,public/build/**}"
         }
     },
@@ -41,7 +44,7 @@
         "CACHE_DRIVER": "array",
         "SESSION_DRIVER": "cookie",
         "LOG_CHANNEL": "stderr",
-        "DB_CONNECTION": "mysql",
+        "DB_CONNECTION": "pgsql",
         "COMPOSER_FLAGS": "--no-dev --prefer-dist --optimize-autoloader --classmap-authoritative"
     }
 }

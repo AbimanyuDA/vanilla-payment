@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -72,6 +73,20 @@ class PaymentController extends Controller
         ]);
 
         return redirect()->route('payment.show', $token)->with('info', 'Silakan pilih metode pembayaran.');
+    }
+
+    public function downloadInvoice(string $token)
+    {
+        $invoice = Invoice::where('payment_token', $token)
+            ->with('items', 'extras')
+            ->firstOrFail();
+
+        if ($invoice->status !== 'paid') {
+            abort(403, 'Invoice belum lunas.');
+        }
+
+        $pdf = Pdf::loadView('admin.invoices.pdf', compact('invoice'))->setPaper('a4');
+        return $pdf->download('invoice-lunas-' . $invoice->invoice_number . '.pdf');
     }
 
     public function uploadProof(Request $request, string $token)

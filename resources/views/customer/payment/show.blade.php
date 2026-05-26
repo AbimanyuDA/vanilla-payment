@@ -150,6 +150,18 @@
         @endif
     </div>
 
+    <!-- Download Invoice (if paid) -->
+    @if($invoice->status === 'paid')
+    <div class="card-vr p-4 mb-4 text-center" style="border:1.5px solid #86efac; background:#f0fdf4;">
+        <div class="font-semibold mb-1" style="color:#14532d;">Pembayaran Dikonfirmasi</div>
+        @if($invoice->paid_at)<div class="text-xs mb-3" style="color:#6b7280;">{{ $invoice->paid_at->format('d M Y, H:i') }}</div>@endif
+        <a href="{{ route('payment.invoice-pdf', $invoice->payment_token) }}"
+           class="btn-primary-vr" style="display:inline-block; text-decoration:none;">
+            Download Invoice PDF
+        </a>
+    </div>
+    @endif
+
     <!-- Payment Section -->
     @if($invoice->status === 'pending_confirmation')
         <div class="card-vr p-5 text-center mb-4">
@@ -210,16 +222,16 @@
             <div class="rounded-xl p-4 mb-4" style="background:#fef9f0; border: 1.5px solid #d1a96a;">
                 <div class="space-y-2 text-sm">
                     <div class="flex justify-between">
+                        <span style="color:#888;">Atas Nama</span>
+                        <span class="font-semibold" style="color:#2c1810;">PT Coffee Nation Prosperity</span>
+                    </div>
+                    <div class="flex justify-between">
                         <span style="color:#888;">Bank</span>
-                        <span class="font-semibold" style="color:#2c1810;">BCA</span>
+                        <span class="font-semibold" style="color:#2c1810;">BRI</span>
                     </div>
                     <div class="flex justify-between">
                         <span style="color:#888;">No. Rekening</span>
-                        <span class="font-mono font-bold" style="color:#2c1810;">1234567890</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span style="color:#888;">Atas Nama</span>
-                        <span class="font-semibold" style="color:#2c1810;">Vanilla Royal</span>
+                        <span class="font-mono font-bold" style="color:#2c1810;">115601002957562</span>
                     </div>
                     <div class="flex justify-between items-center pt-2" style="border-top: 1.5px dashed #d1a96a; margin-top: 4px;">
                         <span class="font-bold" style="color:#2c1810;">Jumlah Transfer</span>

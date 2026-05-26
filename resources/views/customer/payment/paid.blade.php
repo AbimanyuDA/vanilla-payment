@@ -67,6 +67,11 @@
                 Terima kasih telah mempercayai <strong style="color:#41281b;">Vanilla Royal</strong>.<br>
                 Pesanan Anda sedang kami proses.
             </p>
+
+            <a href="{{ route('payment.invoice-pdf', $invoice->payment_token) }}"
+               style="display:block; width:100%; margin-top:1.25rem; padding:0.75rem; background:#2c1810; color:#fff; border-radius:10px; text-align:center; font-size:0.875rem; font-weight:600; text-decoration:none; letter-spacing:0.02em;">
+                Download Invoice PDF
+            </a>
         </div>
 
         <!-- Footer strip -->

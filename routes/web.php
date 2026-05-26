@@ -40,4 +40,5 @@ Route::prefix('pay')->name('payment.')->group(function () {
     Route::post('{token}/method', [PaymentController::class, 'chooseMethod'])->name('choose-method');
     Route::post('{token}/reset-method', [PaymentController::class, 'resetMethod'])->name('reset-method');
     Route::post('{token}/proof', [PaymentController::class, 'uploadProof'])->name('upload-proof');
+    Route::get('{token}/invoice.pdf', [PaymentController::class, 'downloadInvoice'])->name('invoice-pdf');
 });
