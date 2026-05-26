@@ -57,7 +57,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
                 <div>
                     <div class="flex items-center gap-2 mb-1">
-                        <img src="{{ asset('images/logo/CleanlLogo.png') }}" alt="Vanilla Royal" class="w-8 h-8 object-contain">
+                        <img src="{{ asset('images/logo/CleanlLogo.webp') }}" alt="Vanilla Royal" class="w-8 h-8 object-contain">
                         <span class="font-bold text-lg">Vanilla Royal</span>
                     </div>
                     <p class="text-sm text-base-content/60">Payment System</p>

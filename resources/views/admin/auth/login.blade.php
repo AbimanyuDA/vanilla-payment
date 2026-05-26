@@ -17,7 +17,7 @@
     <div class="text-center mb-6">
         <div class="inline-block rounded-2xl px-5 py-4 mb-2"
             style="background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-            <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal Logo"
+            <img src="{{ asset('images/logo/logo.webp') }}" alt="Vanilla Royal Logo"
                 class="h-16 w-auto object-contain mx-auto">
         </div>
         <p class="text-xs font-semibold tracking-[0.2em] mt-2" style="color:#ffdd79;">PAYMENT SYSTEM</p>

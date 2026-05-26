@@ -98,7 +98,7 @@
             <div class="p-5 border-b" style="border-color: rgba(242,153,35,0.3);">
                 <div class="flex flex-col items-center gap-2">
                     <div class="rounded-xl px-4 py-3" style="background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.3);">
-                        <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal Logo"
+                        <img src="{{ asset('images/logo/logo.webp') }}" alt="Vanilla Royal Logo"
                             class="h-12 w-auto object-contain">
                     </div>
                     <div class="font-semibold text-xs tracking-widest" style="color:#ffdd79; letter-spacing:0.15em;">PAYMENT SYSTEM</div>
@@ -143,7 +143,7 @@
             <div class="p-4 text-center sidebar-footer">
                 <div class="flex items-center justify-center gap-2 mb-1">
                     <div class="flex-1 h-px" style="background: rgba(242,153,35,0.15);"></div>
-                    <img src="{{ asset('images/logo/logo.png') }}" alt="" class="h-4 w-auto" style="opacity: 0.35;">
+                    <img src="{{ asset('images/logo/logo.webp') }}" alt="" class="h-4 w-auto" style="opacity: 0.35;">
                     <div class="flex-1 h-px" style="background: rgba(242,153,35,0.15);"></div>
                 </div>
                 <span class="text-xs font-medium" style="color: rgba(255,221,121,0.45);">© {{ date('Y') }} Vanilla Royal</span>

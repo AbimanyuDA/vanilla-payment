@@ -17,7 +17,7 @@
     <!-- Logo -->
     <div style="text-align:center; margin-bottom:1.75rem;">
         <div style="display:inline-block; background:#fff; border-radius:16px; padding:1rem 1.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.25);">
-            <img src="{{ asset('images/logo/logo.png') }}" alt="Vanilla Royal" style="height:40px; width:auto; display:block;">
+            <img src="{{ asset('images/logo/logo.webp') }}" alt="Vanilla Royal" style="height:40px; width:auto; display:block;">
         </div>
     </div>
 
@@ -71,7 +71,7 @@
     <div style="margin-top:1.75rem; text-align:center;">
         <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.6rem;">
             <div style="flex:1; height:1px; background:rgba(242,153,35,0.18);"></div>
-            <img src="{{ asset('images/logo/logo.png') }}" alt="" style="height:18px; width:auto; opacity:0.3;">
+            <img src="{{ asset('images/logo/logo.webp') }}" alt="" style="height:18px; width:auto; opacity:0.3;">
             <div style="flex:1; height:1px; background:rgba(242,153,35,0.18);"></div>
         </div>
         <p style="font-size:0.7rem; color:rgba(255,221,121,0.5); font-weight:500;">© {{ date('Y') }} Vanilla Royal &bull; All rights reserved</p>
