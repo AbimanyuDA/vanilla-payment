@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if (!is_dir('/tmp/dompdf-fonts')) {
+            mkdir('/tmp/dompdf-fonts', 0755, true);
+        }
     }
 }
