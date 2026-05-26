@@ -33,7 +33,7 @@
     "env": {
         "APP_NAME": "Vanilla Royal Payment",
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
+        "APP_DEBUG": "true",
         "APP_URL": "https://payment.vanillaroyal.id",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
