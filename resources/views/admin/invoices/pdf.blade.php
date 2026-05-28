@@ -8,13 +8,15 @@
         body { font-family: Arial, sans-serif; font-size: 12px; color: #2c1810; background: #fff; }
 
         /* Header */
-        .header { background: #2c1810; padding: 24px 28px; display: table; width: 100%; }
-        .header-left { display: table-cell; vertical-align: middle; width: 50%; }
-        .header-right { display: table-cell; vertical-align: middle; text-align: right; }
-        .company-info { color: #ffdd79; }
-        .company-name { font-size: 22px; font-weight: bold; color: #fff; margin-bottom: 2px; }
-        .company-contact { font-size: 9.5px; color: rgba(255,221,121,0.8); line-height: 1.6; margin-top: 4px; }
-        .invoice-label { color: rgba(255,221,121,0.6); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; }
+        .header { background: #fff; border-bottom: 1px solid #f3e8d4; padding: 20px 28px; display: table; width: 100%; }
+        .header-left { display: table-cell; vertical-align: middle; width: 65%; }
+        .header-right { display: table-cell; vertical-align: middle; text-align: right; white-space: nowrap; }
+        .logo-wrap { display: table; }
+        .logo-wrap-img { display: table-cell; vertical-align: middle; }
+        .logo-wrap-name { display: table-cell; vertical-align: middle; padding-left: 10px; }
+        .company-name { font-size: 20px; font-weight: bold; color: #2c1810; letter-spacing: 0.5px; }
+        .company-contact { font-size: 9px; color: #999; line-height: 1.6; margin-top: 4px; }
+        .invoice-label { color: #b08040; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; }
         .invoice-number { font-size: 17px; font-weight: bold; color: #f29923; font-family: monospace; }
 
         /* Gold accent bar */
@@ -87,12 +89,33 @@
 </head>
 <body>
 
+    @php
+        $logoPath = public_path('images/logo/CleanlLogo.png');
+        if (!file_exists($logoPath)) {
+            $logoPath = public_path('images/logo/logo.png');
+        }
+        $logoSrc = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
+    @endphp
+
     <!-- Header -->
     <div class="header">
         <div class="header-left">
-            <div style="font-size:22px; font-weight:bold; color:#fff; margin-bottom:4px; letter-spacing:0.5px;">Vanilla Royal</div>
-            <div class="company-contact">
-                info@vanillaroyal.id &nbsp;|&nbsp; +62 858-5366-9568
+            <div class="logo-wrap">
+                @if($logoSrc)
+                <div class="logo-wrap-img">
+                    <img src="{{ $logoSrc }}" style="height:80px; width:auto; display:block;" alt="Vanilla Royal">
+                </div>
+                @endif
+                <div class="logo-wrap-name">
+                    <div class="company-name">Vanilla Royal</div>
+                    <div class="company-contact">
+                        PT Coffee Nation Prosperity<br>
+                        Jl. Raya Bukit Kweni No 40, Sukodono, Kab. Sidoarjo, Jawa Timur<br>
+                        info@vanillaroyal.id &nbsp;|&nbsp; +62 858-5366-9568 &nbsp;|&nbsp; www.vanillaroyal.id
+                    </div>
+                </div>
             </div>
         </div>
         <div class="header-right">
@@ -224,7 +247,7 @@
 
     <!-- Footer -->
     <div class="footer-bar">
-        <div class="footer-left">Vanilla Royal &bull; info@vanillaroyal.id &bull; +62 858-5366-9568</div>
+        <div class="footer-left">Vanilla Royal (PT Coffee Nation Prosperity) &bull; info@vanillaroyal.id &bull; +62 858-5366-9568</div>
         <div class="footer-right">Dicetak: {{ now()->format('d M Y, H:i') }}</div>
     </div>
 
