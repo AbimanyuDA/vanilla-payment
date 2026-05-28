@@ -18,6 +18,17 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
+            return response(
+                "DEBUG ERROR:\n\n" . 
+                "Message: " . $e->getMessage() . "\n\n" .
+                "File: " . $e->getFile() . " (Line " . $e->getLine() . ")\n\n" .
+                "Trace:\n" . $e->getTraceAsString(),
+                500,
+                ['Content-Type' => 'text/plain']
+            );
+        });
+
         $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, \Illuminate\Http\Request $request) {
             return redirect()->back()->with('error', 'File terlalu besar. Maksimal ukuran file adalah 5MB (JPG/PNG/PDF).');
         });
