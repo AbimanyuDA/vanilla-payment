@@ -1,8 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\BuyerController;
+use App\Http\Controllers\Admin\CompanySettingsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\QuotationController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Customer\PaymentController;
 use App\Http\Middleware\AdminAuthenticate;
@@ -52,6 +56,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export-pdf');
         Route::get('reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
+
+        // International Export Quotations
+        Route::get('quotations-buyers-search', [BuyerController::class, 'search'])->name('buyers.search');
+        Route::get('quotations-products-search', [ProductController::class, 'search'])->name('products.search');
+
+        Route::resource('quotations', QuotationController::class);
+        Route::post('quotations/{quotation}/status', [QuotationController::class, 'updateStatus'])->name('quotations.status');
+        Route::get('quotations/{quotation}/pdf', [QuotationController::class, 'pdf'])->name('quotations.pdf');
+        Route::get('quotations/{quotation}/pdf-preview', [QuotationController::class, 'pdfPreview'])->name('quotations.pdf-preview');
+
+        Route::resource('buyers', BuyerController::class)->except(['show']);
+        Route::resource('products', ProductController::class)->except(['show']);
+
+        Route::get('settings/company', [CompanySettingsController::class, 'edit'])->name('settings.company');
+        Route::post('settings/company', [CompanySettingsController::class, 'update'])->name('settings.company.update');
     });
 });
 
