@@ -19,7 +19,19 @@ from app.cli import seed  # noqa: E402
 from app.db import Base, engine  # noqa: E402
 from app.main import app  # noqa: E402
 
-PNG = b"\x89PNG\r\n\x1a\n" + b"0" * 64
+def _png(size: tuple[int, int] = (2400, 1800)) -> bytes:
+    """A large, noisy RGBA PNG — the worst case for size, with transparency."""
+    import io
+
+    from PIL import Image
+
+    image = Image.frombytes("RGBA", size, os.urandom(size[0] * size[1] * 4))
+    buffer = io.BytesIO()
+    image.save(buffer, "PNG")
+    return buffer.getvalue()
+
+
+PNG = _png((64, 64))
 
 
 @pytest.fixture(scope="module")
@@ -112,3 +124,67 @@ def test_master_data(client: TestClient) -> None:
     assert p.status_code == 201
     assert client.get("/api/products/search?q=tahi").json()[0]["attributes"] == {"grade": "Gourmet"}
     assert client.post("/api/settings/company/logo", files={"logo": ("l.png", PNG, "image/png")}).status_code == 200
+
+
+def test_proof_upload_compresses_any_image_and_pdf() -> None:
+    from app.documents.renderers import report_pdf
+    from app.uploads import UNSUPPORTED_FORMAT, compress_proof
+
+    big = _png((1600, 1200))
+    out = compress_proof(big)
+    assert out.mime == "image/jpeg" and out.content.startswith(b"\xff\xd8\xff")
+    assert len(out.content) < len(big) / 4
+
+    pdf = compress_proof(report_pdf([], 0))
+    assert pdf.mime == "application/pdf" and pdf.content.startswith(b"%PDF")
+
+    with pytest.raises(ValueError, match="Format file tidak didukung"):
+        compress_proof(b"PK\x03\x04 this is a zip, not a receipt")
+    assert "PDF" in UNSUPPORTED_FORMAT
+
+
+def test_proof_endpoint_rejects_non_image(client: TestClient) -> None:
+    r = client.post("/api/invoices", json={
+        "customer_name": "Sari", "items": [{"product_name": "X", "quantity": 1, "unit_price": 1000}],
+    })
+    token = client.get(f"/api/invoices/{r.json()['id']}").json()["payment_token"]
+    pay = TestClient(app)
+    pay.post(f"/api/pay/{token}/method", json={"payment_method": "transfer"})
+    bad = pay.post(f"/api/pay/{token}/proof", files={"proof": ("bukti.docx", b"PK\x03\x04docx", "image/png")})
+    assert bad.status_code == 422 and "Format file tidak didukung" in bad.json()["detail"]
+    ok = pay.post(f"/api/pay/{token}/proof", files={"proof": ("IMG_0001.heic.png", _png((900, 700)), "image/png")})
+    assert ok.status_code == 200, ok.text
+
+
+def test_overdue_invoice_with_pending_proof_can_be_extended_and_confirmed(client: TestClient) -> None:
+    from app.db import SessionLocal
+    from app.models import Invoice
+
+    body = {"customer_name": "Dimas", "items": [{"product_name": "Vanilla", "quantity": 1, "unit_price": 175000}]}
+    inv_id = client.post("/api/invoices", json=body).json()["id"]
+    token = client.get(f"/api/invoices/{inv_id}").json()["payment_token"]
+    pay = TestClient(app)
+    pay.post(f"/api/pay/{token}/method", json={"payment_method": "transfer"})
+    pay.post(f"/api/pay/{token}/proof", files={"proof": ("nota.png", PNG, "image/png")})
+
+    # The admin forgets to confirm and the due date passes.
+    with SessionLocal() as db:
+        db.get(Invoice, inv_id).due_date = date.today() - timedelta(days=2)
+        db.commit()
+    assert pay.get(f"/api/pay/{token}").json()["view"] == "show"  # paid already: must not expire
+    assert client.get(f"/api/invoices/{inv_id}").json()["status"] == "pending_confirmation"
+
+    # An invoice that did expire (legacy data) reopens when the due date is extended.
+    with SessionLocal() as db:
+        db.get(Invoice, inv_id).status = "expired"
+        db.commit()
+    future = (date.today() + timedelta(days=5)).isoformat()
+    assert client.put(f"/api/invoices/{inv_id}", json=body | {"due_date": future}).status_code == 200
+    assert client.get(f"/api/invoices/{inv_id}").json()["status"] == "pending_confirmation"
+
+    # And the pending proof can still be confirmed even straight from "expired".
+    with SessionLocal() as db:
+        db.get(Invoice, inv_id).status = "expired"
+        db.commit()
+    client.post(f"/api/invoices/{inv_id}/confirm-payment", json={"action": "confirm"})
+    assert client.get(f"/api/invoices/{inv_id}").json()["status"] == "paid"

@@ -67,7 +67,8 @@ export function InvoiceDetailPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_22rem] lg:items-start">
         <div className="space-y-6">
-          {inv.status === 'pending_confirmation' && inv.payment_proofs?.[0] && (
+          {/* Any unreviewed proof stays actionable, even on an invoice that lapsed meanwhile. */}
+          {editable && inv.payment_proofs?.[0]?.status === 'pending' && (
             <ProofReview invoiceId={inv.id} proof={inv.payment_proofs[0]} />
           )}
 

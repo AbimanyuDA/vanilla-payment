@@ -5,12 +5,14 @@ import base64
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from starlette.concurrency import run_in_threadpool
 
 from ..db import get_db, now_local
 from ..documents.renderers import invoice_pdf
 from ..models import Invoice, PaymentProof
 from ..schemas import ChooseMethodIn
 from ..serializers import invoice_detail
+from ..uploads import InvalidProof, compress_proof
 from .common import file_response, message
 
 router = APIRouter(tags=["payment"])
@@ -21,10 +23,9 @@ TRANSFER_ACCOUNT = {
     "bank": "BRI",
     "account_number": "115601002957562",
 }
-MAX_PROOF_BYTES = 5 * 1024 * 1024
-ALLOWED_PROOF_TYPES = {
-    "image/jpeg": "jpg", "image/png": "png", "application/pdf": "pdf",
-}
+# Vercel rejects request bodies above 4.5 MB before they reach the app; the
+# browser compresses images first, so only large PDFs/HEICs get near this.
+MAX_PROOF_BYTES = 4 * 1024 * 1024
 PAYABLE = ("sent", "pending_confirmation")
 
 
@@ -90,33 +91,25 @@ async def upload_proof(token: str, proof: UploadFile = File(...), db: Session = 
 
     content = await proof.read(MAX_PROOF_BYTES + 1)
     if len(content) > MAX_PROOF_BYTES:
-        raise HTTPException(422, "Ukuran file maksimal 5MB.")
-    mime = _sniff_mime(content)
-    if mime not in ALLOWED_PROOF_TYPES:
-        raise HTTPException(422, "File harus berupa JPG, PNG, atau PDF.")
+        raise HTTPException(422, "Ukuran file maksimal 4MB.")
+    try:
+        # Type is decided by decoding the bytes, never by the client's filename/MIME.
+        compressed = await run_in_threadpool(compress_proof, content)
+    except InvalidProof as e:
+        raise HTTPException(422, str(e)) from e
 
-    filename = f"proof_{invoice.invoice_number}_{int(now_local().timestamp())}.{ALLOWED_PROOF_TYPES[mime]}"
+    filename = f"proof_{invoice.invoice_number}_{int(now_local().timestamp())}.{compressed.extension}"
+    original = (proof.filename or "bukti").rsplit(".", 1)[0][:240]
     invoice.payment_proofs.append(PaymentProof(
         file_path=f"payment_proofs/{filename}",
-        file_name=(proof.filename or filename)[:255],
-        file_content=base64.b64encode(content).decode(),
-        file_mime=mime,
+        file_name=f"{original}.{compressed.extension}",
+        file_content=base64.b64encode(compressed.content).decode(),
+        file_mime=compressed.mime,
         status="pending",
     ))
     invoice.status = "pending_confirmation"
     db.commit()
     return message("Bukti transfer berhasil dikirim. Menunggu konfirmasi admin.")
-
-
-def _sniff_mime(content: bytes) -> str | None:
-    """Trust the bytes, not the client-supplied content type."""
-    if content.startswith(b"\xff\xd8\xff"):
-        return "image/jpeg"
-    if content.startswith(b"\x89PNG\r\n\x1a\n"):
-        return "image/png"
-    if content.startswith(b"%PDF"):
-        return "application/pdf"
-    return None
 
 
 @router.get("/api/pay/{token}/invoice.pdf")

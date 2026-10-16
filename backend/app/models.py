@@ -67,10 +67,12 @@ class Invoice(TimestampMixin, Base):
     def is_expired(self) -> bool:
         from .db import today_local
 
+        # A submitted proof means the customer already paid before (or around) the
+        # due date; it must stay reviewable instead of silently expiring.
         return bool(
             self.due_date
             and self.due_date < today_local()
-            and self.status not in ("paid", "cancelled")
+            and self.status not in ("paid", "cancelled", "pending_confirmation")
         )
 
 

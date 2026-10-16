@@ -104,10 +104,14 @@ def create_invoice(db: Session, data: InvoiceIn, admin_id: int, today: date) -> 
     return invoice
 
 
-def update_invoice(db: Session, invoice: Invoice, data: InvoiceIn) -> Invoice:
+def update_invoice(db: Session, invoice: Invoice, data: InvoiceIn, today: date) -> Invoice:
     if invoice.status in ("paid", "cancelled"):
         raise BusinessRuleError("Invoice yang sudah lunas atau dibatalkan tidak bisa diedit.")
     _apply_invoice_payload(invoice, data)
+    if invoice.status == "expired" and (invoice.due_date is None or invoice.due_date >= today):
+        # Extending the due date reopens the invoice where it left off.
+        latest = invoice.latest_proof
+        invoice.status = "pending_confirmation" if latest and latest.status == "pending" else "sent"
     db.commit()
     return invoice
 

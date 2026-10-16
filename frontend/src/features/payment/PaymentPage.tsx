@@ -5,6 +5,7 @@ import { useParams } from 'react-router';
 import { Loading } from '../../components/ui/primitives';
 import { api, ApiError, type Message } from '../../lib/api';
 import { formatDate, rupiah } from '../../lib/format';
+import { compressImage, formatBytes, MAX_UPLOAD_BYTES, proofKind, UNSUPPORTED_MESSAGE } from '../../lib/proofFile';
 import type { InvoiceDetail } from '../../lib/types';
 
 type PaymentView = {
@@ -12,8 +13,6 @@ type PaymentView = {
   invoice: InvoiceDetail;
   transfer_account: { account_name: string; bank: string; account_number: string };
 };
-
-const MAX_BYTES = 5 * 1024 * 1024;
 
 export function PaymentPage() {
   const { token = '' } = useParams();
@@ -216,30 +215,74 @@ function PaymentSteps({ token, data }: { token: string; data: PaymentView }) {
   );
 }
 
+type Picked = { file: File; originalSize: number };
+
 function ProofUpload({ token, busy, onSubmit, onInvalid }: {
   token: string; busy: boolean; onSubmit: (fd: FormData) => void; onInvalid: (text: string) => void;
 }) {
-  const [file, setFile] = useState<File | null>(null);
+  const [picked, setPicked] = useState<Picked | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [preparing, setPreparing] = useState(false);
+
+  const choose = async (input: HTMLInputElement) => {
+    const file = input.files?.[0];
+    setPicked(null);
+    setError(null);
+    if (!file) return;
+    const kind = proofKind(file);
+    if (kind === 'unsupported') {
+      input.value = ''; // let the customer pick again straight away
+      return setError(UNSUPPORTED_MESSAGE);
+    }
+    setPreparing(true);
+    const ready = kind === 'image' ? await compressImage(file) : file;
+    setPreparing(false);
+    if (ready.size > MAX_UPLOAD_BYTES) {
+      input.value = '';
+      return setError(
+        kind === 'pdf'
+          ? `Ukuran PDF terlalu besar (${formatBytes(ready.size)}). Maksimal 4 MB — mohon kirim screenshot bukti transfer sebagai gambar.`
+          : `Ukuran file terlalu besar (${formatBytes(ready.size)}). Maksimal 4 MB.`,
+      );
+    }
+    setPicked({ file: ready, originalSize: file.size });
+  };
+
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (!file) return onInvalid('Pilih file bukti transfer terlebih dahulu.');
-    if (file.size > MAX_BYTES) return onInvalid('Ukuran file maksimal 5MB.');
+    if (!picked) return onInvalid('Pilih file bukti transfer terlebih dahulu.');
     const fd = new FormData();
-    fd.append('proof', file);
+    fd.append('proof', picked.file);
     onSubmit(fd);
   };
+
+  const shrunk = picked && picked.file.size < picked.originalSize;
 
   return (
     <form onSubmit={submit} className="border-t border-frost-deep pt-6">
       <h3 className="text-lg">Upload bukti transfer</h3>
       <label htmlFor={`proof-${token}`}
-        className="mt-3 flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-frost-deep bg-white px-4 py-8 text-center transition-colors hover:border-amber">
-        <span className="font-medium">{file ? file.name : 'Pilih file'}</span>
-        <span className="text-xs text-clay">JPG, PNG, atau PDF · maksimal 5MB</span>
-        <input id={`proof-${token}`} type="file" accept=".jpg,.jpeg,.png,.pdf" className="sr-only"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+        className={`mt-3 flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed bg-white px-4 py-8 text-center transition-colors hover:border-amber ${error ? 'border-flag' : 'border-frost-deep'}`}>
+        <span className="font-medium break-all">
+          {preparing ? 'Mengoptimalkan ukuran file…' : picked ? picked.file.name : 'Pilih foto atau PDF'}
+        </span>
+        <span className="text-xs text-clay">
+          {picked
+            ? shrunk
+              ? `Dikompres otomatis: ${formatBytes(picked.originalSize)} → ${formatBytes(picked.file.size)}`
+              : formatBytes(picked.file.size)
+            : 'Gambar (JPG, PNG, HEIC, WebP, dll.) atau PDF · otomatis dikompres'}
+        </span>
+        <input id={`proof-${token}`} type="file" accept="image/*,.heic,.heif,application/pdf,.pdf" className="sr-only"
+          aria-invalid={!!error} aria-describedby={error ? `proof-error-${token}` : undefined}
+          onChange={(e) => void choose(e.currentTarget)} />
       </label>
-      <button className="btn-primary mt-4 w-full py-3" disabled={busy}>
+      {error && (
+        <p id={`proof-error-${token}`} role="alert" className="mt-3 rounded-md border-l-4 border-flag bg-flag-soft px-4 py-3 text-sm text-flag">
+          {error}
+        </p>
+      )}
+      <button className="btn-primary mt-4 w-full py-3" disabled={busy || preparing || !picked}>
         {busy ? 'Mengirim…' : 'Kirim bukti transfer'}
       </button>
     </form>

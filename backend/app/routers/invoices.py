@@ -99,7 +99,7 @@ def show_invoice(invoice_id: int, db: Session = Depends(get_db)) -> dict:
 @router.put("/invoices/{invoice_id}")
 def edit_invoice(invoice_id: int, payload: InvoiceIn, db: Session = Depends(get_db)) -> dict:
     try:
-        update_invoice(db, _invoice(db, invoice_id), payload)
+        update_invoice(db, _invoice(db, invoice_id), payload, today_local())
     except BusinessRuleError as e:
         raise HTTPException(422, str(e)) from e
     return message("Invoice berhasil diperbarui.")
