@@ -148,7 +148,7 @@ def _payment_request_text(invoice: Invoice) -> str:
         f"Total: *{rupiah(invoice.total_amount)}*\n"
         f"{due}"
         f"Klik link berikut untuk memilih metode pembayaran:\n{payment_url(invoice)}\n\n"
-        "Terima kasih 🙏"
+        "Terima kasih,\n*Vanilla Royal*"
     )
 
 
@@ -158,13 +158,13 @@ def _paid_text(invoice: Invoice) -> str:
         f"Halo *{invoice.customer_name}*,",
         "",
         f"Terima kasih, pembayaran Anda untuk invoice *{invoice.invoice_number}* sebesar "
-        f"*{rupiah(invoice.total_amount)}* telah kami terima dan dikonfirmasi ✅",
+        f"*{rupiah(invoice.total_amount)}* telah kami terima dan dikonfirmasi.",
         "",
     ]
     shipment = shipment_out(invoice)
     if shipment:
         lines += [
-            "Pesanan Anda sudah dikirim 📦",
+            "*Informasi Pengiriman*",
             f"Kurir: *{shipment['courier_name']}*",
             f"No. Resi: *{shipment['tracking_number']}*",
             f"Lacak paket: {shipment['tracking_url']}",
@@ -177,11 +177,16 @@ def _paid_text(invoice: Invoice) -> str:
         "Invoice lunas & status pesanan dapat dilihat di:",
         payment_url(invoice),
         "",
-        "Terima kasih telah berbelanja di Vanilla Royal 🙏",
+        "Terima kasih telah berbelanja di Vanilla Royal.",
+        "",
+        "Salam,",
+        "*Vanilla Royal*",
     ]
     return "\n".join(lines)
 
 
+# Messages are deliberately emoji-free: wa.me links opened in WhatsApp Web/Desktop
+# can turn emoji into "�", which looks broken in a payment message.
 def _whatsapp_url(invoice: Invoice) -> str:
     phone = re.sub(r"\D", "", invoice.customer_phone or "")
     if phone.startswith("0"):

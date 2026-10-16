@@ -211,3 +211,15 @@ def test_shipment_after_payment_flows_into_whatsapp_and_customer_page(client: Te
 
     customer = TestClient(app).get(f"/api/pay/{inv['payment_token']}").json()
     assert customer["view"] == "paid" and customer["invoice"]["shipment"]["courier_name"] == "JNE"
+
+
+def test_whatsapp_messages_are_emoji_free(client: TestClient) -> None:
+    """wa.me links opened in WhatsApp Web turn emoji into '�'."""
+    from urllib.parse import unquote
+
+    body = {"customer_name": "Bagas", "customer_phone": "0811", "items": [{"product_name": "V", "quantity": 1, "unit_price": 1}]}
+    inv_id = client.post("/api/invoices", json=body).json()["id"]
+    for _ in range(2):  # payment request, then paid receipt
+        url = client.post(f"/api/invoices/{inv_id}/send-notification", json={"channel": "whatsapp"}).json()["redirect_url"]
+        assert all(ord(ch) < 0x2000 for ch in unquote(url)), unquote(url)
+        client.post(f"/api/invoices/{inv_id}/confirm-payment", json={"action": "confirm"})

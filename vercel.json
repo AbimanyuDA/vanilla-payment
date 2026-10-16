@@ -15,7 +15,7 @@
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index" },
     { "source": "/pay/:token/invoice.pdf", "destination": "/api/index" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!assets/|api/|images/|boot\\.js|favicon\\.ico).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -26,6 +26,10 @@
         { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
         { "key": "Content-Security-Policy", "value": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; object-src 'none'" }
       ]
+    },
+    {
+      "source": "/((?!assets/|api/|images/).*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
     },
     {
       "source": "/assets/(.*)",

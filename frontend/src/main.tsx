@@ -5,9 +5,10 @@ import './styles/global.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
+import { createBrowserRouter, Navigate, RouterProvider, type RouteObject } from 'react-router';
 
 import { AdminLayout } from './components/layout/AdminLayout';
+import { AppError } from './components/ui/AppError';
 import { ToastProvider } from './components/ui/Toast';
 import { ApiError } from './lib/api';
 import { LoginPage } from './features/auth/LoginPage';
@@ -33,7 +34,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const router = createBrowserRouter([
+const routes: RouteObject[] = [
   { path: '/', element: <Navigate to="/admin/dashboard" replace /> },
   { path: '/pay/:token', element: <PaymentPage /> },
   { path: '/admin/login', element: <LoginPage /> },
@@ -62,7 +63,10 @@ const router = createBrowserRouter([
     ],
   },
   { path: '*', element: <Navigate to="/admin/dashboard" replace /> },
-]);
+];
+
+// One pathless root so any render error lands on AppError instead of a blank page.
+const router = createBrowserRouter([{ errorElement: <AppError />, children: routes }]);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
