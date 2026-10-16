@@ -1,0 +1,303 @@
+@import 'tailwindcss';
+
+/**
+ * Vanilla Royal design tokens — shared with vanilla-website-new.
+ *
+ * Same direction as the website ("specification as visual material"): money,
+ * dates and document numbers are the primary objects here, so they get the
+ * display face and tabular figures. Light theme only, like the website.
+ */
+@theme {
+  --color-ink: #1a1210;
+  --color-ink-soft: #3d2f28;
+  --color-paper: #fbfaf8;
+  --color-frost: #f2ece2;
+  --color-frost-deep: #e6dccd;
+  --color-clay: #706357;
+  --color-amber: #b8681a;
+  --color-amber-deep: #8f4f12;
+  --color-gold: #e8a33d;
+  --color-moss: #4a5d3a;
+  --color-moss-soft: #e6ebe0;
+  --color-flag: #a3321f;
+  --color-flag-soft: #f6e4df;
+  --color-sky: #2f5a73;
+  --color-sky-soft: #e1ebf0;
+
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Public Sans Variable', system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+
+  --text-2xs: 0.72rem;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-amber);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Base pieces declared as utilities so the variants below can @apply them. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-clay);
+}
+
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: var(--radius-md);
+  padding: 0.55rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color 150ms var(--ease-out-expo),
+    border-color 150ms var(--ease-out-expo),
+    color 150ms var(--ease-out-expo),
+    transform 150ms var(--ease-out-expo);
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+@utility input {
+  width: 100%;
+  border: 1px solid var(--color-frost-deep);
+  border-radius: var(--radius-md);
+  background-color: #fff;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  color: var(--color-ink);
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--color-clay) 50%, var(--color-frost-deep));
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-amber);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-amber) 15%, transparent);
+  }
+
+  &:disabled {
+    background-color: var(--color-frost);
+    color: var(--color-ink-soft);
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--color-flag);
+  }
+}
+
+@layer components {
+  .eyebrow-accent {
+    @apply eyebrow;
+    color: var(--color-amber);
+  }
+
+  .figure {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums lining-nums;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .btn-primary {
+    @apply btn;
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-amber);
+  }
+
+  .btn-secondary {
+    @apply btn;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
+    background-color: var(--color-paper);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    border-color: var(--color-amber);
+    color: var(--color-amber-deep);
+  }
+
+  .btn-moss {
+    @apply btn;
+    background-color: var(--color-moss);
+    color: var(--color-paper);
+  }
+
+  .btn-moss:hover:not(:disabled) {
+    background-color: #3a4a2d;
+  }
+
+  .btn-danger {
+    @apply btn;
+    border: 1px solid color-mix(in srgb, var(--color-flag) 35%, transparent);
+    color: var(--color-flag);
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    background-color: var(--color-flag);
+    color: var(--color-paper);
+  }
+
+  .btn-sm {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .link {
+    color: var(--color-amber-deep);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-amber) 40%, transparent);
+    text-underline-offset: 3px;
+  }
+
+  .link:hover {
+    text-decoration-color: var(--color-amber);
+  }
+
+  .label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+  }
+
+  .input-figure {
+    @apply input;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .panel {
+    border: 1px solid var(--color-frost-deep);
+    border-radius: var(--radius-lg);
+    background-color: #fff;
+  }
+
+  .panel-frost {
+    border-radius: var(--radius-lg);
+    background-color: var(--color-frost);
+  }
+
+  .ledger {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  .ledger th {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--color-frost-deep);
+    background-color: var(--color-frost);
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-clay);
+    white-space: nowrap;
+  }
+
+  .ledger td {
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-frost-deep) 70%, transparent);
+    vertical-align: top;
+  }
+
+  .ledger tbody tr {
+    transition: background-color 150ms;
+  }
+
+  .ledger tbody tr:hover {
+    background-color: color-mix(in srgb, var(--color-frost) 45%, transparent);
+  }
+
+  .scroll-x {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-rise {
+  animation: rise 420ms var(--ease-out-expo) both;
+}

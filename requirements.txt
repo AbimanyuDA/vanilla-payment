@@ -1,0 +1,9 @@
+fastapi==0.115.12
+sqlalchemy==2.0.41
+psycopg[binary]==3.2.9
+pydantic[email]==2.11.5
+itsdangerous==2.2.0
+python-multipart==0.0.20
+bcrypt==4.3.0
+fpdf2==2.8.3
+openpyxl==3.1.5
