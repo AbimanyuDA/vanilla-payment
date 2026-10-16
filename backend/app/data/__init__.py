@@ -224,3 +224,11 @@ CURRENCIES: dict[str, dict[str, str]] = {
 }
 
 INCOTERMS = ['EXW', 'FCA', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP']
+
+# Couriers for domestic shipments. Neither JNE nor J&T documents a public
+# deep link that pre-fills the airway bill, so customers land on the official
+# tracking page and paste the resi number shown alongside the link.
+COURIERS: dict[str, dict[str, str]] = {
+    "jne": {"name": "JNE", "tracking_url": "https://www.jne.co.id/tracking-package"},
+    "jnt": {"name": "J&T Express", "tracking_url": "https://jet.co.id/track"},
+}

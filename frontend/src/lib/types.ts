@@ -35,7 +35,18 @@ export type PaymentProof = {
   created_at: string;
 };
 
+export type Courier = 'jne' | 'jnt';
+
+export type Shipment = {
+  courier: Courier;
+  courier_name: string;
+  tracking_number: string;
+  tracking_url: string;
+  shipped_at: string | null;
+};
+
 export type InvoiceDetail = InvoiceSummary & {
+  shipment: Shipment | null;
   customer_address: string | null;
   subtotal: number;
   discount: number;

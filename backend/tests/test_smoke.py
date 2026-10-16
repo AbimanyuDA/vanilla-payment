@@ -188,3 +188,26 @@ def test_overdue_invoice_with_pending_proof_can_be_extended_and_confirmed(client
         db.commit()
     client.post(f"/api/invoices/{inv_id}/confirm-payment", json={"action": "confirm"})
     assert client.get(f"/api/invoices/{inv_id}").json()["status"] == "paid"
+
+
+def test_shipment_after_payment_flows_into_whatsapp_and_customer_page(client: TestClient) -> None:
+    from urllib.parse import unquote
+
+    body = {"customer_name": "Dimas", "customer_phone": "0822277", "items": [{"product_name": "V", "quantity": 1, "unit_price": 1000}]}
+    inv_id = client.post("/api/invoices", json=body).json()["id"]
+    shipment = {"courier": "jne", "tracking_number": "cgk1234567890"}
+    assert client.put(f"/api/invoices/{inv_id}/shipment", json=shipment).status_code == 422  # not paid yet
+
+    client.post(f"/api/invoices/{inv_id}/confirm-payment", json={"action": "confirm"})
+    paid_msg = unquote(client.post(f"/api/invoices/{inv_id}/send-notification", json={"channel": "whatsapp"}).json()["redirect_url"])
+    assert "telah kami terima" in paid_msg and "sedang kami siapkan" in paid_msg
+
+    assert client.put(f"/api/invoices/{inv_id}/shipment", json=shipment).status_code == 200
+    assert client.put(f"/api/invoices/{inv_id}/shipment", json={"courier": "dhl", "tracking_number": "X"}).status_code == 422
+    msg = unquote(client.post(f"/api/invoices/{inv_id}/send-notification", json={"channel": "whatsapp"}).json()["redirect_url"])
+    inv = client.get(f"/api/invoices/{inv_id}").json()
+    assert "CGK1234567890" in msg and "jne.co.id/tracking-package" in msg and inv["payment_url"] in msg
+    assert inv["status"] == "paid"
+
+    customer = TestClient(app).get(f"/api/pay/{inv['payment_token']}").json()
+    assert customer["view"] == "paid" and customer["invoice"]["shipment"]["courier_name"] == "JNE"

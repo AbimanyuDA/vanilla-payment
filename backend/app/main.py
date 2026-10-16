@@ -17,14 +17,26 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
+# (table, column, type) — nullable columns added on top of the Laravel schema.
+SCHEMA_PATCHES = (
+    ("company_settings", "logo_data", "TEXT"),
+    ("invoices", "courier", "VARCHAR(50)"),
+    ("invoices", "tracking_number", "VARCHAR(100)"),
+    ("invoices", "shipped_at", "TIMESTAMP"),
+)
+
+
 def ensure_schema() -> None:
-    """Additive, idempotent schema patches on top of the Laravel tables."""
+    """Additive, idempotent schema patches; existing rows are left untouched."""
     try:
-        columns = {c["name"] for c in inspect(engine).get_columns("company_settings")}
-        if "logo_data" not in columns:
+        inspector = inspect(engine)
+        existing = {t: {c["name"] for c in inspector.get_columns(t)} for t in {p[0] for p in SCHEMA_PATCHES}}
+        missing = [p for p in SCHEMA_PATCHES if p[1] not in existing[p[0]]]
+        if missing:
             with engine.begin() as conn:
-                conn.execute(text("ALTER TABLE company_settings ADD COLUMN logo_data TEXT"))
-    except Exception:  # never block boot; the settings page will surface the error
+                for table, column, ddl in missing:
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}"))
+    except Exception:  # never block boot; affected pages will surface the error
         logger.exception("ensure_schema failed")
 
 

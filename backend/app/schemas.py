@@ -65,6 +65,16 @@ class NotificationIn(Payload):
     channel: Literal["whatsapp", "email"]
 
 
+class ShipmentIn(Payload):
+    courier: Literal["jne", "jnt"]
+    tracking_number: str = Field(min_length=6, max_length=100, pattern=r"^[A-Za-z0-9-]+$")
+
+    @field_validator("tracking_number")
+    @classmethod
+    def _upper(cls, v: str) -> str:
+        return v.upper()
+
+
 class ChooseMethodIn(Payload):
     payment_method: Literal["transfer"]
 

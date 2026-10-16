@@ -7,14 +7,14 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from ..config import get_settings
-from ..db import get_db, today_local
+from ..db import get_db, now_local, today_local
 from ..documents.pdf_base import rupiah
 from ..documents.renderers import invoice_pdf, report_excel, report_pdf
 from ..mailer import send_invoice_email
 from ..models import Admin, Invoice
-from ..schemas import ConfirmPaymentIn, InvoiceIn, NotificationIn
+from ..schemas import ConfirmPaymentIn, InvoiceIn, NotificationIn, ShipmentIn
 from ..security import current_admin
-from ..serializers import invoice_detail, invoice_summary
+from ..serializers import invoice_detail, invoice_summary, shipment_out
 from ..services import BusinessRuleError, confirm_payment, create_invoice, update_invoice
 from .common import file_response, get_or_404, like, message, paginate
 
@@ -139,12 +139,9 @@ def cancel(invoice_id: int, db: Session = Depends(get_db)) -> dict:
     return message("Invoice berhasil dibatalkan.")
 
 
-def _whatsapp_url(invoice: Invoice) -> str:
-    phone = re.sub(r"\D", "", invoice.customer_phone or "")
-    if phone.startswith("0"):
-        phone = "62" + phone[1:]
+def _payment_request_text(invoice: Invoice) -> str:
     due = f"Jatuh Tempo: *{invoice.due_date:%d/%m/%Y}*\n\n" if invoice.due_date else "\n"
-    text = (
+    return (
         f"Halo *{invoice.customer_name}*,\n\n"
         "Berikut invoice pembayaran Anda dari *Vanilla Royal*:\n\n"
         f"No. Invoice: *{invoice.invoice_number}*\n"
@@ -153,7 +150,58 @@ def _whatsapp_url(invoice: Invoice) -> str:
         f"Klik link berikut untuk memilih metode pembayaran:\n{payment_url(invoice)}\n\n"
         "Terima kasih 🙏"
     )
+
+
+def _paid_text(invoice: Invoice) -> str:
+    """Payment receipt, plus shipment details once the admin has entered a resi."""
+    lines = [
+        f"Halo *{invoice.customer_name}*,",
+        "",
+        f"Terima kasih, pembayaran Anda untuk invoice *{invoice.invoice_number}* sebesar "
+        f"*{rupiah(invoice.total_amount)}* telah kami terima dan dikonfirmasi ✅",
+        "",
+    ]
+    shipment = shipment_out(invoice)
+    if shipment:
+        lines += [
+            "Pesanan Anda sudah dikirim 📦",
+            f"Kurir: *{shipment['courier_name']}*",
+            f"No. Resi: *{shipment['tracking_number']}*",
+            f"Lacak paket: {shipment['tracking_url']}",
+            "(salin nomor resi di atas ke halaman pelacakan)",
+            "",
+        ]
+    else:
+        lines += ["Pesanan Anda sedang kami siapkan untuk pengiriman.", ""]
+    lines += [
+        "Invoice lunas & status pesanan dapat dilihat di:",
+        payment_url(invoice),
+        "",
+        "Terima kasih telah berbelanja di Vanilla Royal 🙏",
+    ]
+    return "\n".join(lines)
+
+
+def _whatsapp_url(invoice: Invoice) -> str:
+    phone = re.sub(r"\D", "", invoice.customer_phone or "")
+    if phone.startswith("0"):
+        phone = "62" + phone[1:]
+    text = _paid_text(invoice) if invoice.status == "paid" else _payment_request_text(invoice)
     return f"https://wa.me/{phone}?text={quote(text)}"
+
+
+@router.put("/invoices/{invoice_id}/shipment")
+def save_shipment(invoice_id: int, payload: ShipmentIn, db: Session = Depends(get_db)) -> dict:
+    invoice = _invoice(db, invoice_id)
+    if invoice.status != "paid":
+        raise HTTPException(422, "Data pengiriman hanya bisa diisi setelah invoice lunas.")
+    changed = (invoice.courier, invoice.tracking_number) != (payload.courier, payload.tracking_number)
+    invoice.courier = payload.courier
+    invoice.tracking_number = payload.tracking_number
+    if changed or invoice.shipped_at is None:
+        invoice.shipped_at = now_local()
+    db.commit()
+    return message("Data pengiriman disimpan. Kirim info resi ke customer via WhatsApp.")
 
 
 @router.post("/invoices/{invoice_id}/send-notification")

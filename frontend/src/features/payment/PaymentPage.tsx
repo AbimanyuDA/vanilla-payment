@@ -6,7 +6,7 @@ import { Loading } from '../../components/ui/primitives';
 import { api, ApiError, type Message } from '../../lib/api';
 import { formatDate, rupiah } from '../../lib/format';
 import { compressImage, formatBytes, MAX_UPLOAD_BYTES, proofKind, UNSUPPORTED_MESSAGE } from '../../lib/proofFile';
-import type { InvoiceDetail } from '../../lib/types';
+import type { InvoiceDetail, Shipment } from '../../lib/types';
 
 type PaymentView = {
   view: 'show' | 'paid' | 'cancelled' | 'expired';
@@ -58,6 +58,7 @@ function PaymentContent({ token, data }: { token: string; data: PaymentView }) {
           <a href={`/pay/${token}/invoice.pdf`} className="btn-moss mt-4 flex w-full sm:w-auto sm:inline-flex">Unduh invoice lunas (PDF)</a>
         </Notice>
       )}
+      {view === 'paid' && <ShipmentCard shipment={invoice.shipment} />}
       {view === 'cancelled' && (
         <Notice tone="flag" title="Invoice dibatalkan">
           Invoice ini telah dibatalkan. Hubungi Vanilla Royal jika menurut Anda ini keliru.
@@ -286,6 +287,43 @@ function ProofUpload({ token, busy, onSubmit, onInvalid }: {
         {busy ? 'Mengirim…' : 'Kirim bukti transfer'}
       </button>
     </form>
+  );
+}
+
+function ShipmentCard({ shipment }: { shipment: Shipment | null }) {
+  if (!shipment) {
+    return (
+      <section className="panel flex items-center gap-4 p-5">
+        <span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-md bg-frost text-xl">📦</span>
+        <div>
+          <p className="eyebrow">Pengiriman</p>
+          <p className="mt-0.5 text-sm text-ink-soft">Pesanan Anda sedang kami siapkan. Nomor resi akan muncul di halaman ini setelah paket dikirim.</p>
+        </div>
+      </section>
+    );
+  }
+  return (
+    <section className="animate-rise panel overflow-hidden">
+      <div className="flex items-center justify-between gap-3 border-b border-frost-deep bg-frost px-5 py-3">
+        <p className="eyebrow-accent">Pesanan dikirim</p>
+        {shipment.shipped_at && <span className="text-xs text-clay">{formatDate(shipment.shipped_at, true)}</span>}
+      </div>
+      <div className="p-5">
+        <dl className="grid grid-cols-[auto_1fr] items-center gap-x-6 gap-y-3 text-sm">
+          <dt className="eyebrow">Kurir</dt>
+          <dd className="font-medium">{shipment.courier_name}</dd>
+          <dt className="eyebrow">No. resi</dt>
+          <dd className="flex flex-wrap items-center gap-3 font-mono text-base">
+            {shipment.tracking_number}
+            <CopyButton value={shipment.tracking_number} />
+          </dd>
+        </dl>
+        <a href={shipment.tracking_url} target="_blank" rel="noreferrer" className="btn-primary mt-5 w-full py-3">
+          Lacak paket di {shipment.courier_name} ↗
+        </a>
+        <p className="mt-2 text-center text-xs text-clay">Salin nomor resi, lalu tempel di halaman pelacakan {shipment.courier_name}.</p>
+      </div>
+    </section>
   );
 }
 

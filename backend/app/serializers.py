@@ -4,6 +4,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
+from .data import COURIERS
 from .models import Admin, Buyer, CompanySettings, Invoice, PaymentProof, Product, Quotation
 
 INVOICE_STATUS_LABELS = {
@@ -72,6 +73,19 @@ def invoice_summary(inv: Invoice) -> dict[str, Any]:
     }
 
 
+def shipment_out(inv: Invoice) -> dict[str, Any] | None:
+    if not (inv.courier and inv.tracking_number):
+        return None
+    courier = COURIERS.get(inv.courier, {"name": inv.courier.upper(), "tracking_url": ""})
+    return {
+        "courier": inv.courier,
+        "courier_name": courier["name"],
+        "tracking_number": inv.tracking_number,
+        "tracking_url": courier["tracking_url"],
+        "shipped_at": _dt(inv.shipped_at),
+    }
+
+
 def invoice_detail(inv: Invoice, include_proofs: bool = True) -> dict[str, Any]:
     data = invoice_summary(inv) | {
         "customer_address": inv.customer_address,
@@ -92,6 +106,7 @@ def invoice_detail(inv: Invoice, include_proofs: bool = True) -> dict[str, Any]:
         ],
         "extras": [{"id": e.id, "label": e.label, "amount": _num(e.amount)} for e in inv.extras],
     }
+    data["shipment"] = shipment_out(inv)
     latest = inv.latest_proof
     data["latest_proof"] = proof_out(latest, include_file=False) if latest else None
     if include_proofs:

@@ -47,6 +47,9 @@ class Invoice(TimestampMixin, Base):
     notes: Mapped[Optional[str]] = mapped_column(Text)
     due_date: Mapped[Optional[date]] = mapped_column(Date)
     paid_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    courier: Mapped[Optional[str]] = mapped_column(String(50))
+    tracking_number: Mapped[Optional[str]] = mapped_column(String(100))
+    shipped_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
     created_by: Mapped[int] = mapped_column(ForeignKey("admins.id"))
 
     items: Mapped[list["InvoiceItem"]] = relationship(

@@ -8,6 +8,7 @@ import { api, type Message } from '../../lib/api';
 import { formatDate, rupiah } from '../../lib/format';
 import { useAction } from '../../lib/hooks';
 import type { InvoiceDetail, PaymentProof } from '../../lib/types';
+import { ShipmentPanel } from './ShipmentPanel';
 
 const INVALIDATE = [['invoice'], ['invoices'], ['dashboard']];
 
@@ -36,6 +37,7 @@ export function InvoiceDetailPage() {
   if (q.error) return <ErrorState error={q.error} />;
   const inv = q.data;
   const editable = !['paid', 'cancelled'].includes(inv.status);
+  const isPaid = inv.status === 'paid';
 
   const copyLink = async () => {
     try {
@@ -132,17 +134,32 @@ export function InvoiceDetailPage() {
             ]} />
           </Section>
 
-          <section className="panel-frost p-5">
-            <p className="eyebrow">Link pembayaran customer</p>
+          {isPaid && <ShipmentPanel invoiceId={inv.id} shipment={inv.shipment} onSaved={() => undefined} />}
+
+          <section className={isPaid ? 'rounded-lg border border-moss/30 bg-moss-soft p-5' : 'panel-frost p-5'}>
+            <p className="eyebrow">{isPaid ? 'Kirim konfirmasi ke customer' : 'Link pembayaran customer'}</p>
+            {isPaid ? (
+              <ul className="mt-2 space-y-1 text-sm text-ink-soft">
+                <li>✓ Konfirmasi pembayaran lunas</li>
+                <li className={inv.shipment ? '' : 'text-clay'}>
+                  {inv.shipment ? `✓ Kurir ${inv.shipment.courier_name} + no. resi + link lacak` : '○ Info resi (belum diisi)'}
+                </li>
+                <li>✓ Link invoice lunas yang sama</li>
+              </ul>
+            ) : null}
             <p className="mt-2 font-mono text-xs break-all text-ink-soft">{inv.payment_url}</p>
             <div className="mt-4 grid gap-2">
               <button className="btn-secondary" onClick={copyLink}>Salin link</button>
               <button className="btn-moss" disabled={!inv.customer_phone || notifyCustomer.isPending}
                 title={inv.customer_phone ? undefined : 'Nomor telepon customer belum diisi'}
-                onClick={() => notifyCustomer.mutate('whatsapp')}>Kirim via WhatsApp</button>
+                onClick={() => notifyCustomer.mutate('whatsapp')}>
+                {isPaid ? 'Kirim konfirmasi via WhatsApp' : 'Kirim via WhatsApp'}
+              </button>
               <button className="btn-secondary" disabled={!inv.customer_email || notifyCustomer.isPending}
                 title={inv.customer_email ? undefined : 'Email customer belum diisi'}
-                onClick={() => notifyCustomer.mutate('email')}>Kirim via email</button>
+                onClick={() => notifyCustomer.mutate('email')}>
+                {isPaid ? 'Kirim konfirmasi via email' : 'Kirim via email'}
+              </button>
             </div>
           </section>
 
